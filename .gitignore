@@ -103,3 +103,27 @@ htmlcov/
 secrets/
 *.pem
 *.key
+
+
+# ============================
+# State tracking
+# ============================
+state.json
+src/utils/state.json
+
+# ============================
+# ChromaDB (disk persist)
+# ============================
+data/chroma_db/
+data/chroma_db/**
+
+# ============================
+# Local cache (rebuildable)
+# ============================
+data/cache/
+data/cache/**
+
+# ============================
+# Source ingestion (include in git ✅)
+# ============================
+!data/sources/
