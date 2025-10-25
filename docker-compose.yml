@@ -1,0 +1,27 @@
+services:
+  rag-app:
+    build: .
+    container_name: rag-gemini-langgraph
+    env_file: .env
+    volumes:
+      # ChromaDB -> Named Volume ✅
+      - chroma_data:/app/data/chroma_db
+
+      # Source documents (PDF/TXT) -> Local bind mount ✅
+      - ./data/sources:/app/data/sources
+
+      # Cache (opsiyonel)
+      - ./data/cache:/app/data/cache
+
+    stdin_open: true # interactive console (python -m src.main)
+    tty: true
+    restart: unless-stopped
+    mem_limit: 4g
+
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+
+volumes:
+  chroma_data: {}

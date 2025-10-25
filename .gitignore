@@ -1,0 +1,105 @@
+# ============================
+# Python Cache / Build Artifacts
+# ============================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.egg
+dist/
+build/
+pip-wheel-metadata/
+wheels/
+.eggs/
+
+# ============================
+# Virtual Environments
+# ============================
+.venv/
+.venv*/
+venv/
+env/
+env*/
+*.virtualenv
+*.conda
+
+# ============================
+# Environment Files
+# ============================
+.env
+.env.local
+.env.*.local
+config.yaml
+
+# ============================
+# Jupyter
+# ============================
+.ipynb_checkpoints
+
+# ============================
+# Local Data / Caches
+# ============================
+data/cache/
+data/chroma_db/
+data/chroma_db/*
+
+# But keep ingestion sources 👇
+!data/sources/
+data/sources/cache*
+data/sources/*.log
+
+# ============================
+# Logs & Debug
+# ============================
+*.log
+logs/
+debug/
+*.out
+*.err
+
+# ============================
+# Reports / Generated Files
+# ============================
+*.pdf
+*.docx
+reports/
+output/
+exports/
+
+# ============================
+# Tools / Editors
+# ============================
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ============================
+# Docker
+# ============================
+docker-data/
+docker-compose.override.yml
+
+# ============================
+# OS / System Files
+# ============================
+ehthumbs.db
+Icon?
+.profiler/
+
+# ============================
+# Test / Coverage
+# ============================
+.coverage
+htmlcov/
+.pytest_cache/
+
+# ============================
+# Security
+# ============================
+secrets/
+*.pem
+*.key

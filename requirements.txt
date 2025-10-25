@@ -1,0 +1,47 @@
+# =========================
+# CORE DEPENDENCIES
+# =========================
+langgraph>=0.2.10
+langchain>=0.2.14
+chromadb>=0.5.3
+pydantic>=2.8.2
+tqdm>=4.66.4
+python-dotenv>=1.0.1
+
+# =========================
+# AI / LLM CLIENTS
+# =========================
+google-generativeai>=0.7.2   # ✅ Gemini API
+tavily-python>=0.3.2         # ✅ Tavily Search
+
+# =========================
+# EMBEDDING & MODELING (CPU)
+# =========================
+sentence-transformers>=3.0.1
+transformers>=4.43.3
+torch==2.2.2                # ✅ CPU-only wheel, docker'da index-url ile kurulacak
+numpy==1.26.4               # ✅ PyTorch CPU uyumlu
+
+# =========================
+# VECTOR DB + DATA HANDLING
+# =========================
+PyPDF2>=3.0.1
+pdfminer.six>=20231228
+unstructured>=0.14.3
+pandas>=2.2.2
+
+# =========================
+# UTILITIES
+# =========================
+requests>=2.32.3
+reportlab>=4.2.5
+colorama>=0.4.6
+rich>=13.7.1
+pyyaml>=6.0.2
+
+# =========================
+# OPTIONAL - DEV & DEBUG
+# =========================
+ipykernel>=6.29.4
+black>=24.4.2
+isort>=5.13.2
