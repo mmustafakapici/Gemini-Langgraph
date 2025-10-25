@@ -1,27 +1,32 @@
 services:
-  rag-app:
-    build: .
-    container_name: rag-gemini-langgraph
+  backend:
+    container_name: rag-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
     env_file: .env
+    ports:
+      - "8000:8000"
     volumes:
-      # ChromaDB -> Named Volume ✅
       - chroma_data:/app/data/chroma_db
-
-      # Source documents (PDF/TXT) -> Local bind mount ✅
       - ./data/sources:/app/data/sources
-
-      # Cache (opsiyonel)
       - ./data/cache:/app/data/cache
-
-    stdin_open: true # interactive console (python -m src.main)
-    tty: true
+    command: uvicorn src.api.app:app --host 0.0.0.0 --port 8000
     restart: unless-stopped
-    mem_limit: 4g
+    mem_limit: 4G
 
-    deploy:
-      resources:
-        limits:
-          memory: 4g
+  ui:
+    container_name: rag-ui
+    build:
+      context: ./ui
+      dockerfile: ../Dockerfile.ui
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    restart: unless-stopped
 
 volumes:
-  chroma_data: {}
+  chroma_data:

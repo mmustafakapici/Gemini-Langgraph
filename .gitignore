@@ -127,3 +127,15 @@ data/cache/**
 # Source ingestion (include in git ✅)
 # ============================
 !data/sources/
+
+
+
+# ============================
+# UI Build Artifacts
+# ============================
+ui/node_modules/
+ui/build/
+ui/dist/
+ui/.env.local
+ui/.env.*.local
+ui/.cache/

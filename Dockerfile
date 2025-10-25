@@ -2,21 +2,21 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Sistem paketleri (opsiyonel)
-RUN apt-get update && apt-get install -y git
-
-# Gereksinim dosyalarını önce kopyala (cache için)
+# Sadece backend bağımlılıklarını al ✅
 COPY requirements.txt .
-
 RUN pip install --upgrade pip
 RUN pip install torch==2.2.2 --index-url https://download.pytorch.org/whl/cpu
 RUN pip install -r requirements.txt
 
-# 🔥 En kritik satır: Projenin tamamını /app içine kopyala
-COPY . .
+# Backend kodunu al — UI dahil değil ✅
+COPY src ./src
+COPY data ./data
+COPY .env .env
 
-# Python modül yolu düzgün olsun
+# UI klasörü kopyalanmıyor ❌
+# COPY ui ./ui  --- YOK
+
 ENV PYTHONPATH=/app
 
-# Ana uygulamayı başlat
-CMD ["python", "-m", "src.main"]
+EXPOSE 8000
+CMD ["uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
