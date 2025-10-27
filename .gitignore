@@ -39,6 +39,15 @@ config.yaml
 .ipynb_checkpoints
 
 # ============================
+# Reports / Generated Files
+# ============================
+*.pdf
+*.docx
+reports/
+output/
+exports/
+
+# ============================
 # Local Data / Caches
 # ============================
 data/cache/
@@ -59,14 +68,7 @@ debug/
 *.out
 *.err
 
-# ============================
-# Reports / Generated Files
-# ============================
-*.pdf
-*.docx
-reports/
-output/
-exports/
+
 
 # ============================
 # Tools / Editors

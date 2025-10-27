@@ -1,11 +1,15 @@
 from pydantic import BaseModel
 from typing import Optional, List
+
 from src.pipeline import run_rag
-from src.utils.logger import log_info, log_success
+from src.utils.logger import log_info, log_success, log_warning
+from src.utils.session import load_or_create_session_id
+
 
 class QueryRequest(BaseModel):
     query: str
-    top_k: Optional[int] = 3
+    session_id: str
+
 
 class QueryResponse(BaseModel):
     query: str
@@ -13,31 +17,33 @@ class QueryResponse(BaseModel):
     hallucination_score: float
     answer_grade: float
     retrieved_docs: Optional[List[str]]
+    source: str  # "generic_llm" | "web_search" | "chroma_db"
+
 
 class RAGRouter:
     """
-    Basit bir yönlendirici. Konsol veya CLI üzerinden gelen komutları işler.
-    İleride FastAPI ya da REST interface eklenmek istenirse bu sınıf genişletilebilir.
+    UI + CLI yönlendiricisi.
+    Memory-aware RAG çağrılarını yönetir.
     """
     def __init__(self):
-        log_info("RAG Router initialized.")
+        log_info("[RAG Router initialized]")
 
     def handle_query(self, data: QueryRequest) -> QueryResponse:
-        log_info(f"Handling query: {data.query}")
-        result = run_rag(data.query)
+        log_info(f"[Router] Handling query: {data.query}")
+
+        if not data.session_id:
+            log_warning("[Router] Session ID eksik → yenisi oluşturuluyor")
+            data.session_id = load_or_create_session_id()
+
+        result = run_rag(data.query, data.session_id)
+
+        log_success("[Router] ✅ RAG işlemi tamam")
+
         return QueryResponse(
             query=data.query,
             answer=result["answer"],
             hallucination_score=result["hallucination_score"],
             answer_grade=result["answer_grade"],
-            retrieved_docs=result["docs"]
+            retrieved_docs=result["docs"],
+            source=result["source"],
         )
-
-if __name__ == "__main__":
-    router = RAGRouter()
-    query = input("Sorgu girin: ")
-    req = QueryRequest(query=query)
-    resp = router.handle_query(req)
-    log_success(f"Cevap: {resp.answer}")
-    print(f"Hallucination Score: {resp.hallucination_score}")
-    print(f"Answer Grade: {resp.answer_grade}")

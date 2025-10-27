@@ -6,12 +6,12 @@ services:
       dockerfile: Dockerfile
     env_file: .env
     ports:
-      - "8000:8000"
+      - "8008:8008"
     volumes:
       - chroma_data:/app/data/chroma_db
       - ./data/sources:/app/data/sources
       - ./data/cache:/app/data/cache
-    command: uvicorn src.api.app:app --host 0.0.0.0 --port 8000
+    command: uvicorn src.api.app:app --host 0.0.0.0 --port 8008
     restart: unless-stopped
     mem_limit: 4G
 
@@ -21,11 +21,11 @@ services:
       context: ./ui
       dockerfile: ../Dockerfile.ui
     ports:
-      - "5173:5173"
+      - "5177:5177"
     depends_on:
       - backend
     environment:
-      - VITE_API_URL=http://localhost:8000
+      - VITE_API_URL=http://localhost:8008
     restart: unless-stopped
 
 volumes:

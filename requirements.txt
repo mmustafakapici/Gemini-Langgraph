@@ -12,7 +12,8 @@ python-dotenv>=1.0.1
 # AI / LLM CLIENTS
 # =========================
 google-generativeai>=0.7.2   # ✅ Gemini API
-tavily-python>=0.3.2         # ✅ Tavily Search
+tavily-python>=0.3.2    
+langchain_google_genai>=0.2.0    # ✅ Tavily Search
 
 # =========================
 # EMBEDDING & MODELING (CPU)
@@ -38,7 +39,7 @@ reportlab>=4.2.5
 colorama>=0.4.6
 rich>=13.7.1
 pyyaml>=6.0.2
-
+uuid >=1.30
 # =========================
 # OPTIONAL - DEV & DEBUG
 # =========================
