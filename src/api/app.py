@@ -106,6 +106,9 @@ async def rag_stream(req: QueryRequest):
 
     async def event_generator():
         try:
+            # İlk başta client'a hemen bir START event'i gönderiyoruz
+            # böylece istemci stream'in başladığını anında görebilir.
+            yield "data: [STREAM_STARTED]\n\n"
             async for chunk in stream_rag(req.query, req.session_id):
                 # chunk zaten "data: ...\n\n" formatında dönüyor
                 yield chunk
@@ -117,7 +120,13 @@ async def rag_stream(req: QueryRequest):
             yield f"data: [ERROR] {str(e)}\n\n"
 
     # StreamingResponse ile chunked SSE yanıtı veriyoruz
+    # Cache-Control ve X-Accel-Buffering header'ları bazı proxylerin
+    # cevap bufferlamasını engellemeye yardımcı olur.
     return StreamingResponse(
         event_generator(),
         media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
     )

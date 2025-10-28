@@ -114,6 +114,31 @@ docker-bash-ui:
 	docker exec -it rag-ui sh
 
 
+# ---------------------------------------------------------------------------
+# Per-service Docker helpers
+# ---------------------------------------------------------------------------
+
+# Backend: stop, remove, build and start only backend
+docker-backend-down:
+	docker compose stop backend && docker compose rm -f backend
+
+docker-backend-build:
+	docker compose build --no-cache backend
+
+docker-backend-rebuild: docker-backend-down docker-backend-build
+	docker compose up -d backend
+
+# UI: stop, remove, build and start only ui
+docker-ui-down:
+	docker compose stop ui && docker compose rm -f ui
+
+docker-ui-build:
+	docker compose build --no-cache ui
+
+docker-ui-rebuild: docker-ui-down docker-ui-build
+	docker compose up -d ui
+
+
 # ============================================================================
 # Docker Data Ops
 # ============================================================================
@@ -125,27 +150,6 @@ docker-inspect:
 	docker exec -it rag-backend ls -l /app/data/chroma_db
 
 
-# ============================================================================
-# Service Level Control
-# ============================================================================
-
-backend-up:
-	docker compose up -d rag-backend
-
-backend-down:
-	docker compose stop rag-backend && docker compose rm -f rag-backend
-
-backend-restart:
-	make backend-down && make backend-up
-
-ui-up:
-	docker compose up -d rag-ui
-
-ui-down:
-	docker compose stop rag-ui && docker compose rm -f rag-ui
-
-ui-restart:
-	make ui-down && make ui-up
 
 
 # ============================================================================

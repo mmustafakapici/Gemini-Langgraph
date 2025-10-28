@@ -15,6 +15,7 @@ from src.utils.logger import (
     log_warning,
     log_error,
 )
+import asyncio
 from src.utils.state_tracker import StateTracker
 from src.memory.session_store import get_memory  # session-based memory
 
@@ -355,11 +356,21 @@ Bağlama sadık kalarak Türkçe, net ve profesyonel bir cevap ver.
         # Streaming yanıt
         stream = model.generate_content(prompt, stream=True)
         full_answer_chunks: List[str] = []
+        chunk_idx = 0
 
+        log_info(f"[STREAM][GENERIC_CHAT] starting stream for session={session_id}")
         for chunk in stream:
             if chunk.text:
+                chunk_idx += 1
+                preview = (chunk.text[:120] + '...') if len(chunk.text) > 120 else chunk.text
+                log_info(f"[STREAM CHUNK][GENERIC_CHAT] idx={chunk_idx} len={len(chunk.text)} preview={preview!r}")
                 full_answer_chunks.append(chunk.text)
+                log_info(f"[STREAM CHUNK][GENERIC_CHAT] sending chunk idx={chunk_idx}")
                 yield f"data: {chunk.text}\n\n"
+                # küçük bir sleep ile event loop'e ve socket flush'a fırsat ver
+                await asyncio.sleep(0)
+                log_info(f"[STREAM CHUNK][GENERIC_CHAT] sent chunk idx={chunk_idx}")
+        log_info(f"[STREAM][GENERIC_CHAT] finished stream, chunks={chunk_idx} session={session_id}")
 
         # full answer'i memory'e yaz
         final_answer = "".join(full_answer_chunks).strip()
@@ -394,11 +405,19 @@ Emin olmadığın yerde açıkça "emin değilim" de.
 """
         stream = model.generate_content(prompt, stream=True)
         full_answer_chunks: List[str] = []
-
+        chunk_idx = 0
+        log_info(f"[STREAM][WEB] starting stream for session={session_id}")
         for chunk in stream:
             if chunk.text:
+                chunk_idx += 1
+                preview = (chunk.text[:120] + '...') if len(chunk.text) > 120 else chunk.text
+                log_info(f"[STREAM CHUNK][WEB] idx={chunk_idx} len={len(chunk.text)} preview={preview!r}")
                 full_answer_chunks.append(chunk.text)
+                log_info(f"[STREAM CHUNK][WEB] sending chunk idx={chunk_idx}")
                 yield f"data: {chunk.text}\n\n"
+                await asyncio.sleep(0)
+                log_info(f"[STREAM CHUNK][WEB] sent chunk idx={chunk_idx}")
+        log_info(f"[STREAM][WEB] finished stream, chunks={chunk_idx} session={session_id}")
 
         final_answer = "".join(full_answer_chunks).strip()
         if final_answer:
@@ -446,7 +465,10 @@ Türkçe, profesyonel ve güvenilir bir cevap yaz.
         for chunk in stream:
             if chunk.text:
                 full_answer_chunks.append(chunk.text)
+                log_info(f"[STREAM CHUNK][RAG-fallback] sending chunk len={len(chunk.text)}")
                 yield f"data: {chunk.text}\n\n"
+                await asyncio.sleep(0)
+                log_info(f"[STREAM CHUNK][RAG-fallback] sent chunk")
 
         final_answer = "".join(full_answer_chunks).strip()
         if final_answer:
@@ -494,7 +516,10 @@ Yanıtta uydurma yapma; emin değilsen açıkça belirt.
     for chunk in stream:
         if chunk.text:
             full_answer_chunks.append(chunk.text)
+            log_info(f"[STREAM CHUNK][RAG] sending chunk len={len(chunk.text)}")
             yield f"data: {chunk.text}\n\n"
+            await asyncio.sleep(0)
+            log_info(f"[STREAM CHUNK][RAG] sent chunk")
 
     final_answer = "".join(full_answer_chunks).strip()
     if final_answer:
