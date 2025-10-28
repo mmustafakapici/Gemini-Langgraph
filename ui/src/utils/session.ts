@@ -1,3 +1,5 @@
+import { listSessions, deleteSession, getSessionMeta, createSession as createNewDefaultSession } from './storage';
+
 const ACTIVE_SESSION_KEY = "rag_session_id";
 
 function generateId(): string {
@@ -12,7 +14,8 @@ function generateId(): string {
 export function getSessionId(): string {
   let id = localStorage.getItem(ACTIVE_SESSION_KEY);
   if (!id) {
-    id = generateId();
+    const newSession = createNewDefaultSession(); // Varsayılan olarak kalıcı bir oturum oluştur
+    id = newSession.id;
     localStorage.setItem(ACTIVE_SESSION_KEY, id);
   }
   return id;
@@ -28,4 +31,18 @@ export function resetSession(): void {
 
 export function generateSessionId(): string {
   return generateId();
+}
+
+export function cleanupTemporarySessionOnLoad(): void {
+  const activeId = localStorage.getItem(ACTIVE_SESSION_KEY);
+  if (activeId) {
+    const sessionMeta = getSessionMeta(activeId);
+    if (sessionMeta && sessionMeta.isTemporary) {
+      deleteSession(activeId); // Geçici oturumu sil
+      resetSession(); // Aktif oturum ID'sini temizle
+      // Yeni bir varsayılan oturum oluştur ve onu aktif yap
+      const newDefaultSession = createNewDefaultSession();
+      setActiveSessionId(newDefaultSession.id);
+    }
+  }
 }

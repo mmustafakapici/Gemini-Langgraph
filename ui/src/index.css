@@ -9,18 +9,18 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: theme('colors.eerie_black.600');
+  background: theme('colors.eerie_black'); /* Changed from eerie_black.600 */
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: theme('colors.black_olive.600');
+  background: theme('colors.black_olive'); /* Changed from black_olive.600 */
   border-radius: 10px;
-  border: 2px solid theme('colors.eerie_black.600');
+  border: 2px solid theme('colors.eerie_black'); /* Changed from eerie_black.600 */
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: theme('colors.black_olive.700');
+  background: theme('colors.black_olive'); /* Changed from black_olive.700 */
 }
 
 /* Custom Scrollbar for thin textareas */
@@ -30,18 +30,18 @@
 }
 
 .custom-scrollbar-thin::-webkit-scrollbar-track {
-  background: theme('colors.eerie_black.700');
+  background: theme('colors.eerie_black'); /* Changed from eerie_black.700 */
   border-radius: 10px;
 }
 
 .custom-scrollbar-thin::-webkit-scrollbar-thumb {
-  background: theme('colors.black_olive.700');
+  background: theme('colors.black_olive'); /* Changed from black_olive.700 */
   border-radius: 10px;
-  border: 1px solid theme('colors.eerie_black.700');
+  border: 1px solid theme('colors.eerie_black'); /* Changed from eerie_black.700 */
 }
 
 .custom-scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: theme('colors.black_olive.800');
+  background: theme('colors.black_olive'); /* Changed from black_olive.800 */
 }
 
 /* Basic animation for the bot icon */

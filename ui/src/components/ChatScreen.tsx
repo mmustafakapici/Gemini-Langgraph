@@ -128,16 +128,16 @@ const ChatScreen: React.FC = () => {
     }
   };
 
-  const handleNewChat = () => {
-    // Create a new session and switch to it
-    const meta = createSession();
-    setActiveSessionLocal(meta.id);
-    setSessionId(meta.id);
+  const handleNewChat = (newSessionId?: string) => {
+    // Use the provided newSessionId, or create one if not provided (should not happen in current flow)
+    const idToActivate = newSessionId || createSession().id;
+    setActiveSessionLocal(idToActivate);
+    setSessionId(idToActivate);
     setMessages([]);
     try {
-      setActiveSessionId(meta.id);
+      setActiveSessionId(idToActivate);
     } catch {}
-    console.log("New chat started!", meta.id);
+    console.log("New chat started!", idToActivate);
   };
 
   const handleSelectSession = (id: string) => {
@@ -159,7 +159,7 @@ const ChatScreen: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-eerie_black-500 text-floral_white-500">
+    <div className="flex h-screen bg-eerie_black text-floral_white">
       <Sidebar
         onNewChat={handleNewChat}
         onLogout={handleLogout}

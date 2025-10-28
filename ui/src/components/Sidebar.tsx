@@ -6,6 +6,8 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  MessageSquare,
+  Zap, // Geçici sohbet için yeni ikon
 } from "lucide-react";
 import {
   listSessions,
@@ -42,7 +44,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, []);
 
   const handleNew = () => {
-    const meta = createSession();
+    const meta = createSession(); // Varsayılan olarak kalıcı sohbet
+    onNewChat(meta.id);
+    setSessions(listSessions());
+  };
+
+  const handleNewTemporaryChat = () => {
+    const meta = createSession("Geçici Sohbet", true); // Geçici sohbet oluştur
     onNewChat(meta.id);
     setSessions(listSessions());
   };
@@ -88,13 +96,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div
-      className={`bg-black_olive-100 p-4 flex flex-col rounded-xl shadow-lg transition-all duration-200 ${
+      className={`bg-black_olive p-4 flex flex-col rounded-xl shadow-lg transition-all duration-200 ${
         collapsed ? "w-16" : "w-72 md:w-80 lg:w-80"
       }`}
     >
       <div className="flex items-center justify-between mb-6">
         <h2
-          className={`text-2xl font-bold text-flame-500 ${
+          className={`text-2xl font-bold text-flame ${
             collapsed ? "hidden" : ""
           }`}
         >
@@ -102,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </h2>
         <button
           onClick={() => setCollapsed((c) => !c)}
-          className="p-1 rounded bg-eerie_black-600 text-timberwolf-300 hover:bg-eerie_black-500"
+          className="p-1 rounded bg-eerie_black text-timberwolf hover:bg-black_olive"
           title={collapsed ? "Sidebar genişlet" : "Sidebar daralt"}
         >
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
@@ -111,137 +119,141 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       <button
         onClick={handleNew}
-        className={`flex items-center justify-center ${
-          collapsed ? "w-12 h-10" : "w-full py-3 px-4 mb-4"
-        } bg-flame-600 text-floral_white-500 rounded-xl shadow-md hover:bg-flame-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-flame-500 focus:ring-offset-2 focus:ring-offset-black_olive-700`}
+        className={`flex items-center ${
+          collapsed ? "justify-center w-12 h-10" : "w-full py-3 px-4 mb-2 justify-center"
+        } bg-flame text-floral_white rounded-xl shadow-md hover:bg-flame transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-flame focus:ring-offset-2 focus:ring-offset-black_olive`}
       >
         <Plus size={20} className={`${collapsed ? "" : "mr-2"}`} />
         {!collapsed && "Yeni Sohbet"}
       </button>
 
+      <button
+        onClick={handleNewTemporaryChat}
+        className={`flex items-center ${
+          collapsed ? "justify-center w-12 h-10" : "w-full py-3 px-4 mb-4 justify-center"
+        } bg-black_olive text-timberwolf rounded-xl shadow-md hover:bg-eerie_black transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-timberwolf focus:ring-offset-2 focus:ring-offset-black_olive`}
+      >
+        <Zap size={20} className={`${collapsed ? "" : "mr-2"}`} />
+        {!collapsed && "Geçici Sohbet"}
+      </button>
+
       <div className="flex-1 overflow-y-auto custom-scrollbar-thin">
         {sessions.length === 0 ? (
-          <p className="text-timberwolf-400 text-sm text-center mt-4">
+          <p className={`text-timberwolf text-sm text-center mt-4 ${collapsed ? "hidden" : ""}`}>
             Henüz sohbet yok.
           </p>
         ) : (
           <ul className="space-y-2">
             {sessions.map((s) => (
-              <li key={s.id}>
+              <li key={s.id} className="relative">
                 <button
                   onClick={() => onSelectSession(s.id)}
-                  className={`w-full text-left p-3 rounded-lg transition-colors duration-200 flex items-center justify-between ${
+                  className={`w-full text-left p-3 rounded-lg transition-colors duration-200 flex items-center ${
                     s.id === activeSessionId
-                      ? "bg-flame-600 text-floral_white-500"
-                      : "hover:bg-black_olive-600"
-                  }`}
+                      ? "bg-flame text-floral_white"
+                      : "hover:bg-black_olive text-timberwolf"
+                  } ${collapsed ? "justify-center" : "justify-between"}`}
                   aria-pressed={s.id === activeSessionId}
                 >
-                  <div className="flex flex-col">
-                    {editingId === s.id ? (
-                      <div className="flex items-center gap-2">
-                        <input
-                          autoFocus
-                          value={editingTitle}
-                          onChange={(ev) => setEditingTitle(ev.target.value)}
-                          onKeyDown={(ev) => {
-                            if (ev.key === "Enter") saveRename(s.id);
-                            if (ev.key === "Escape") cancelRename();
-                          }}
-                          onBlur={() => saveRename(s.id)}
-                          className="bg-transparent text-sm outline-none w-44"
-                        />
-                        <button
-                          onClick={() => saveRename(s.id)}
-                          className="text-xs px-2 py-1 bg-flame-500 rounded text-floral_white-500"
-                        >
-                          Kaydet
-                        </button>
-                        <button
-                          onClick={cancelRename}
-                          className="text-xs px-2 py-1 bg-gray-600 rounded text-timberwolf-200"
-                        >
-                          İptal
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <span
-                          className={`font-medium text-sm ${
-                            collapsed ? "hidden" : ""
-                          }`}
-                        >
-                          {s.title || "Sohbet"}
-                        </span>
-                        <span
-                          className={`text-xs text-timberwolf-400 truncate ${
-                            collapsed ? "hidden" : "max-w-[40rem]"
-                          }`}
-                        >
-                          {s.lastMessage || "—"}
-                        </span>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="text-xs text-timberwolf-400 mr-2">
-                      {new Date(s.updatedAt).toLocaleTimeString()}
+                  {collapsed ? (
+                    s.isTemporary ? <Zap size={20} /> : <MessageSquare size={20} />
+                  ) : (
+                    <div className="flex flex-col flex-grow overflow-hidden">
+                      {editingId === s.id ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            autoFocus
+                            value={editingTitle}
+                            onChange={(ev) => setEditingTitle(ev.target.value)}
+                            onKeyDown={(ev) => {
+                              if (ev.key === "Enter") saveRename(s.id);
+                              if (ev.key === "Escape") cancelRename();
+                            }}
+                            onBlur={() => saveRename(s.id)}
+                            className="bg-eerie_black text-sm outline-none rounded px-2 py-1 w-full text-floral_white"
+                          />
+                          <button
+                            onClick={() => saveRename(s.id)}
+                            className="text-xs px-2 py-1 bg-flame rounded text-floral_white hover:bg-flame"
+                          >
+                            Kaydet
+                          </button>
+                          <button
+                            onClick={cancelRename}
+                            className="text-xs px-2 py-1 bg-black_olive rounded text-timberwolf hover:bg-eerie_black"
+                          >
+                            İptal
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="font-medium text-sm truncate flex items-center gap-2">
+                            {s.isTemporary && <Zap size={14} className="text-flame" />}
+                            {s.title || "Sohbet"}
+                          </span>
+                          <span className="text-xs text-timberwolf truncate max-w-[40rem]">
+                            {s.lastMessage || "—"}
+                          </span>
+                        </>
+                      )}
                     </div>
-                    {editingId !== s.id && (
-                      <>
-                        {!collapsed && (
-                          <>
-                            <button
-                              onClick={(e) => handleRename(e, s.id)}
-                              title="Yeniden adlandır"
-                              className="p-1"
-                            >
-                              <Edit2 size={14} />
-                            </button>
-                            <button
-                              onClick={(e) => handleDelete(e, s.id)}
-                              title="Sohbeti sil"
-                              className="p-1"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </>
-                        )}
-                      </>
-                    )}
+                  )}
 
-                    {confirmDeleteId === s.id && (
-                      <div className="ml-2 p-2 bg-eerie_black-700 border border-black_olive-600 rounded text-sm flex items-center gap-2">
-                        <span>Silinsin mi?</span>
-                        <button
-                          onClick={() => confirmDelete(s.id)}
-                          className="px-2 py-1 bg-red-600 rounded text-floral_white-500"
-                        >
-                          Sil
-                        </button>
-                        <button
-                          onClick={cancelDelete}
-                          className="px-2 py-1 bg-gray-600 rounded text-timberwolf-200"
-                        >
-                          İptal
-                        </button>
+                  {!collapsed && editingId !== s.id && (
+                    <div className="flex items-center gap-2 ml-auto">
+                      <div className="text-xs text-timberwolf">
+                        {new Date(s.updatedAt).toLocaleTimeString()}
                       </div>
-                    )}
-                  </div>
+                      <button
+                        onClick={(e) => handleRename(e, s.id)}
+                        title="Yeniden adlandır"
+                        className="p-1 hover:text-floral_white"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                      <button
+                        onClick={(e) => handleDelete(e, s.id)}
+                        title="Sohbeti sil"
+                        className="p-1 hover:text-flame"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  )}
                 </button>
+
+                {confirmDeleteId === s.id && !collapsed && (
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 mr-2 p-3 bg-eerie_black border border-black_olive rounded-lg shadow-xl text-sm flex items-center gap-3 z-10">
+                    <span className="text-floral_white">Silinsin mi?</span>
+                    <button
+                      onClick={() => confirmDelete(s.id)}
+                      className="px-3 py-1 bg-flame rounded-md text-floral_white hover:bg-flame transition-colors duration-200"
+                    >
+                      Sil
+                    </button>
+                    <button
+                      onClick={cancelDelete}
+                      className="px-3 py-1 bg-black_olive rounded-md text-timberwolf hover:bg-eerie_black transition-colors duration-200"
+                    >
+                      İptal
+                    </button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
         )}
       </div>
 
-      <div className="mt-auto pt-4 border-t border-black_olive-600">
+      <div className="mt-auto pt-4 border-t border-black_olive">
         <button
           onClick={onLogout}
-          className="flex items-center justify-center w-full py-3 px-4 bg-eerie_black-600 text-timberwolf-400 rounded-xl shadow-md hover:bg-eerie_black-500 hover:text-floral_white-500 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-timberwolf-500 focus:ring-offset-2 focus:ring-offset-black_olive-700"
+          className={`flex items-center ${
+            collapsed ? "justify-center w-12 h-10" : "w-full py-3 px-4 justify-center"
+          } bg-eerie_black text-timberwolf rounded-xl shadow-md hover:bg-black_olive hover:text-floral_white transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-timberwolf focus:ring-offset-2 focus:ring-offset-black_olive`}
         >
-          <LogOut size={20} className="mr-2" /> Oturumu Kapat
+          <LogOut size={20} className={`${collapsed ? "" : "mr-2"}`} />{" "}
+          {!collapsed && "Oturumu Kapat"}
         </button>
       </div>
     </div>

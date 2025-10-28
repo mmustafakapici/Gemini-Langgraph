@@ -7,6 +7,7 @@ export interface SessionMeta {
   lastMessage?: string;
   updatedAt: number;
   unread?: number;
+  isTemporary?: boolean; // Yeni eklendi
 }
 
 const SESSIONS_KEY = 'chat_sessions';
@@ -25,13 +26,18 @@ export function listSessions(): SessionMeta[] {
   return safeParse<SessionMeta[]>(localStorage.getItem(SESSIONS_KEY), []);
 }
 
+export function getSessionMeta(id: string): SessionMeta | undefined {
+  const sessions = listSessions();
+  return sessions.find(session => session.id === id);
+}
+
 export function saveSessions(sessions: SessionMeta[]) {
   localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
 }
 
-export function createSession(title?: string): SessionMeta {
+export function createSession(title?: string, isTemporary: boolean = false): SessionMeta {
   const id = generateSessionId();
-  const meta: SessionMeta = { id, title: title || 'Yeni Sohbet', updatedAt: Date.now(), unread: 0 };
+  const meta: SessionMeta = { id, title: title || 'Yeni Sohbet', updatedAt: Date.now(), unread: 0, isTemporary };
   const sessions = listSessions();
   sessions.unshift(meta);
   saveSessions(sessions);
