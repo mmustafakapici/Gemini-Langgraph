@@ -55,6 +55,7 @@ export function deleteSession(id: string) {
   const sessions = listSessions().filter((s) => s.id !== id);
   saveSessions(sessions);
   localStorage.removeItem(`chat_messages:${id}`);
+  try { window.dispatchEvent(new Event('storage')); } catch {}
 }
 
 export function loadMessages(sessionId: string) {
@@ -69,10 +70,18 @@ export function saveMessage(sessionId: string, message: any) {
   const sessions = listSessions();
   const idx = sessions.findIndex((s) => s.id === sessionId);
   if (idx !== -1) {
+    // otomatik başlık atama: eğer başlık hala varsayılansa ve gelen mesaj AI'dan ise
+    const currentTitle = sessions[idx].title || '';
+    if ((currentTitle === '' || currentTitle.startsWith('Yeni Sohbet')) && message.sender === 'ai') {
+      const auto = (message.text || '').trim().replace(/\s+/g, ' ').slice(0, 60);
+      if (auto) sessions[idx].title = auto;
+    }
+
     sessions[idx].lastMessage = message.text ?? '';
     sessions[idx].updatedAt = Date.now();
     sessions[idx].unread = (sessions[idx].unread || 0) + (message.sender === 'ai' ? 1 : 0);
     saveSessions(sessions);
+    try { window.dispatchEvent(new Event('storage')); } catch {}
   }
 }
 
