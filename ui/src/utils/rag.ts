@@ -1,5 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL;
-
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8008';
 function nowTs() {
   const d = new Date();
   return d.toLocaleTimeString();
@@ -61,7 +60,9 @@ export async function ragStream({ query, session_id, onToken }: RagStreamOptions
 
     for (const line of lines) {
       if (!line.startsWith("data:")) continue;
-      const content = line.replace("data:", "").trim();
+      // extract raw content and normalize escaped newlines immediately
+      const raw = line.replace("data:", "").trim();
+      const content = raw.split("\\n").join("\n");
 
   // alınan event'in içeriği (kısa önizleme)
   console.debug(`${nowTs()} - alınan chunk içerik uzunluğu=${content.length} önizleme=${JSON.stringify(content.slice(0,120))}`);
@@ -109,7 +110,7 @@ export async function ragStream({ query, session_id, onToken }: RagStreamOptions
           console.info(`${nowTs()} - İlk içerik parçası alındı — client artık anlık tokenları işlemeye başladı`);
           firstChunkReceived = true;
         }
-        onToken(content);
+  onToken(content);
       }
     }
   }

@@ -17,6 +17,21 @@ interface Message {
   isStreaming?: boolean; // To indicate if the message is currently being streamed
 }
 
+// Helper function to finalize Markdown content
+const finalizeMarkdown = (text: string): string => {
+  let fixed = text;
+
+  // Fix incomplete code blocks: if the count of "```" is odd, close the last one.
+  const codeBlockCount = (fixed.match(/```/g) || []).length;
+  if (codeBlockCount % 2 !== 0) {
+    fixed += "\n```";
+  }
+
+  // Add other Markdown fixes here if needed in the future (e.g., for lists, headers)
+
+  return fixed;
+};
+
 const ChatScreen: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [sessionId, setSessionId] = useState<string>("");
@@ -95,28 +110,36 @@ const ChatScreen: React.FC = () => {
       });
     } catch (error) {
       console.error("Error during RAG stream:", error);
+      // Finalize and update message with error
+      const errorMessage = "Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin.";
+      const finalizedError = finalizeMarkdown(errorMessage);
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === aiMessageId
             ? {
                 ...msg,
-                text: "Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin.",
+                text: finalizedError,
                 isStreaming: false,
               }
             : msg
         )
       );
     } finally {
+      // Finalize the accumulated response before updating state and saving
+      const finalizedAccumulatedResponse = finalizeMarkdown(accumulatedResponse);
+
       setMessages((prev) =>
         prev.map((msg) =>
-          msg.id === aiMessageId ? { ...msg, isStreaming: false } : msg
+          msg.id === aiMessageId
+            ? { ...msg, text: finalizedAccumulatedResponse, isStreaming: false }
+            : msg
         )
       );
       // finalize AI message in storage
       const final = {
         id: aiMessageId,
         sender: "ai",
-        text: accumulatedResponse,
+        text: finalizedAccumulatedResponse, // Use finalized text for storage
         createdAt: Date.now(),
       };
       try {
@@ -167,7 +190,7 @@ const ChatScreen: React.FC = () => {
         activeSessionId={activeSessionId}
       />
       <div className="flex flex-col flex-1 ml-4 rounded-xl shadow-2xl overflow-hidden">
-        <ChatArea messages={messages} />
+        <ChatArea messages={messages} onSendMessage={handleSendMessage} />
         <MessageInput onSendMessage={handleSendMessage} isLoading={isLoading} />
       </div>
     </div>

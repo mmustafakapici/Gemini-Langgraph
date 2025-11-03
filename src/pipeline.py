@@ -80,6 +80,7 @@ Kullanıcının yeni mesajı:
 {question}
 
 Bağlamı koruyarak Türkçe ve net cevap ver.
+Cevabı **mutlaka Markdown formatında** üret; sadece markdown içeriği döndür.
 """
     resp = model.generate_content(prompt)
     return (resp.text or "").strip()
@@ -103,6 +104,7 @@ Soru: {question}
 
 Sadece bu bağlamı kullanarak Türkçe, profesyonel bir yanıt üret.
 Emin olmadığın noktaları varsayma.
+Cevabı **mutlaka Markdown formatında** üret; sadece markdown içeriği döndür.
 """
     try:
         resp = model.generate_content(prompt)
@@ -249,6 +251,7 @@ Kullanıcı sorusu:
 {normalized_q}
 
 Profesyonel, kurumsal tonda Türkçe bir yanıt ver.
+Cevabı **mutlaka Markdown formatında** üret; sadece markdown içeriği döndür.
 """
     final = model.generate_content(gen_prompt)
     answer = (final.text or "").strip()
@@ -366,7 +369,9 @@ Bağlama sadık kalarak Türkçe, net ve profesyonel bir cevap ver.
                 log_info(f"[STREAM CHUNK][GENERIC_CHAT] idx={chunk_idx} len={len(chunk.text)} preview={preview!r}")
                 full_answer_chunks.append(chunk.text)
                 log_info(f"[STREAM CHUNK][GENERIC_CHAT] sending chunk idx={chunk_idx}")
-                yield f"data: {chunk.text}\n\n"
+                # escape newlines so client can rehydrate chunks safely
+                chunk_text = (chunk.text or "").replace("\n", "\\n")
+                yield f"data: {chunk_text}\n\n"
                 # küçük bir sleep ile event loop'e ve socket flush'a fırsat ver
                 await asyncio.sleep(0)
                 log_info(f"[STREAM CHUNK][GENERIC_CHAT] sent chunk idx={chunk_idx}")
@@ -414,7 +419,8 @@ Emin olmadığın yerde açıkça "emin değilim" de.
                 log_info(f"[STREAM CHUNK][WEB] idx={chunk_idx} len={len(chunk.text)} preview={preview!r}")
                 full_answer_chunks.append(chunk.text)
                 log_info(f"[STREAM CHUNK][WEB] sending chunk idx={chunk_idx}")
-                yield f"data: {chunk.text}\n\n"
+                chunk_text = (chunk.text or "").replace("\n", "\\n")
+                yield f"data: {chunk_text}\n\n"
                 await asyncio.sleep(0)
                 log_info(f"[STREAM CHUNK][WEB] sent chunk idx={chunk_idx}")
         log_info(f"[STREAM][WEB] finished stream, chunks={chunk_idx} session={session_id}")
@@ -466,7 +472,8 @@ Türkçe, profesyonel ve güvenilir bir cevap yaz.
             if chunk.text:
                 full_answer_chunks.append(chunk.text)
                 log_info(f"[STREAM CHUNK][RAG-fallback] sending chunk len={len(chunk.text)}")
-                yield f"data: {chunk.text}\n\n"
+                chunk_text = (chunk.text or "").replace("\n", "\\n")
+                yield f"data: {chunk_text}\n\n"
                 await asyncio.sleep(0)
                 log_info(f"[STREAM CHUNK][RAG-fallback] sent chunk")
 
@@ -517,7 +524,8 @@ Yanıtta uydurma yapma; emin değilsen açıkça belirt.
         if chunk.text:
             full_answer_chunks.append(chunk.text)
             log_info(f"[STREAM CHUNK][RAG] sending chunk len={len(chunk.text)}")
-            yield f"data: {chunk.text}\n\n"
+            chunk_text = (chunk.text or "").replace("\n", "\\n")
+            yield f"data: {chunk_text}\n\n"
             await asyncio.sleep(0)
             log_info(f"[STREAM CHUNK][RAG] sent chunk")
 
